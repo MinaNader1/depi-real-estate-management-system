@@ -15,8 +15,8 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 builder.Services.ConfigureApplicationCookie(option =>
 {
-    option.AccessDeniedPath = "home/error";
-    option.LoginPath = "home/index";
+    option.AccessDeniedPath = "/home/error";
+    option.LoginPath = "/home/index";
     option.ExpireTimeSpan = TimeSpan.FromMinutes(5);
     option.SlidingExpiration = true;
 });
