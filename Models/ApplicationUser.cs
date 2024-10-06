@@ -2,7 +2,7 @@
 
 namespace depi_real_state_management_system.Models
 {
-    public class User : IdentityUser
+    public class ApplicationUser : IdentityUser
     {
 
     }

@@ -9,14 +9,14 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(option =>
 {
     option.AccessDeniedPath = "/home/error";
-    option.LoginPath = "/home/index";
+    option.LoginPath = "/account/login";
     option.ExpireTimeSpan = TimeSpan.FromMinutes(5);
     option.SlidingExpiration = true;
 });

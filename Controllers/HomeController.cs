@@ -1,4 +1,5 @@
 using depi_real_state_management_system.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -13,6 +14,8 @@ namespace depi_real_state_management_system.Controllers
             _logger = logger;
         }
 
+        // i commented it for now to easly access the home page
+        //[Authorize]
         public IActionResult Index()
         {
             return View();
