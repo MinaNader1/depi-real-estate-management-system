@@ -12,11 +12,13 @@ namespace depi_real_state_management_system.Controllers
         private readonly UserManager<ApplicationUser> _UserManager;
         private readonly SignInManager<ApplicationUser> _SignInManager;
         private readonly RoleManager<IdentityRole> _RoleManager;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
+        private readonly ApplicationDbContext _context;
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
         {
             _UserManager = userManager;
             _SignInManager = signInManager;
             _RoleManager = roleManager;
+            _context = context;
         }
         //-----------------------------------------Authentication---------------------------------------
         public async Task<IActionResult> Register()
@@ -103,6 +105,31 @@ namespace depi_real_state_management_system.Controllers
             await _RoleManager.CreateAsync(roleModel);
             return View();
         }
+
+
+
+        public async Task<IActionResult> Profile(string id)
+        {
+            // Find the user by their ID
+            var user = await _UserManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Fetch the properties owned by the user
+            var userProperties = await _context.Properties
+                                               .Where(p => p.OwnerId == id)
+                                               .ToListAsync();
+
+            // Pass the user and properties to the view using ViewBag
+            ViewBag.User = user;
+            ViewBag.Properties = userProperties;
+
+            return View();
+        }
+
 
         public IActionResult Error()
         {

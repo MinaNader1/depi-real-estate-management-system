@@ -1,13 +1,16 @@
 ﻿@model Property
 
 <div class="card">
-    <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Location" />
+    <img src="/images/@Model.ImageUrl" class="card-img-top" alt="@Model.Location" />
     <div class="card-body">
         <h5 class="card-title">@Model.Location</h5>
         <p class="card-text">Size: @Model.Size</p>
         <p class="card-text">Price: @Model.Price ₤</p>
         <p class="card-text">Description: @Model.Description</p>
-        <p class="card-text">Owner: @Model.OwnerName</p>
+        <p class="card-text">
+            Owner: <a href="@Url.Action("Profile", "Account", new { id = Model.OwnerId })">@Model.Owner.UserName</a>
+        </p>
+
         <p class="card-text">Added on: @Model.DateAdded.ToShortDateString()</p>
         <p class="card-text">@if (Model.IsAvailable)
             {

@@ -1,0 +1,25 @@
+﻿@{
+    var user = ViewBag.User as ApplicationUser;
+    var properties = ViewBag.Properties as List<Property>;
+}
+
+<h2>@user.UserName's Profile</h2>
+
+<p><strong>Email:</strong> @user.Email</p>
+<p><strong>Full Name:</strong> @user.UserName</p>
+
+<h3>Properties Owned</h3>
+@if (properties != null && properties.Count > 0)
+{
+        <ul>
+        @foreach (var property in properties)
+        {
+            <li>@Html.ActionLink(property.Location, "Details", "Property", new { id = property.PropertyID }, null)</li>
+        }
+        </ul>
+}
+}
+else
+{
+    <p>No properties owned.</p>
+}
