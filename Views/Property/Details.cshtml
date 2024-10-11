@@ -1,0 +1,21 @@
+﻿@model Property
+
+<div class="card">
+    <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Location" />
+    <div class="card-body">
+        <h5 class="card-title">@Model.Location</h5>
+        <p class="card-text">Size: @Model.Size</p>
+        <p class="card-text">Price: @Model.Price ₤</p>
+        <p class="card-text">Description: @Model.Description</p>
+        <p class="card-text">Owner: @Model.OwnerName</p>
+        <p class="card-text">Added on: @Model.DateAdded.ToShortDateString()</p>
+        <p class="card-text">@if (Model.IsAvailable)
+            {
+                <span class="badge bg-success">Available</span>
+            }
+            else
+            {
+                <span class="badge bg-danger">Unavailable</span>
+            }</p>
+    </div>
+</div>

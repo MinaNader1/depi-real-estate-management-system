@@ -72,11 +72,10 @@ namespace depi_real_state_management_system.Controllers
         }
 
 
-        //Bug: the Login doesn't work as expected
         [HttpPost]
         public async Task<IActionResult> ConfirmLogin(ApplicationUser user)
         {
-            var result = await _SignInManager.PasswordSignInAsync(user.Email, user.PasswordHash, false, false);
+            var result = await _SignInManager.PasswordSignInAsync(user.UserName, user.PasswordHash, user.RememberMe, false);
 
             if (result.Succeeded)
             {
