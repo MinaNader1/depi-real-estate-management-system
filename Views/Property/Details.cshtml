@@ -12,13 +12,27 @@
         </p>
 
         <p class="card-text">Added on: @Model.DateAdded.ToShortDateString()</p>
-        <p class="card-text">@if (Model.IsAvailable)
+
+        <p class="card-text">
+            @if (Model.IsAvailable)
             {
                 <span class="badge bg-success">Available</span>
             }
             else
             {
                 <span class="badge bg-danger">Unavailable</span>
-            }</p>
+            }
+        </p>
+
+        @if (Model.IsAvailable)
+        {
+            <form action="@Url.Action("CreateBooking", "Lease", new { id = Model.PropertyID })" method="post">
+                <button type="submit" class="btn btn-primary">Book</button>
+            </form>
+        }
+        else
+        {
+            <p class="text-danger">This property is currently unavailable for booking.</p>
+        }
     </div>
 </div>

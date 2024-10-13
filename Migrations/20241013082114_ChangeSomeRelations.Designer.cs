@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using depi_real_state_management_system.Models;
 
@@ -11,9 +12,11 @@ using depi_real_state_management_system.Models;
 namespace depi_real_state_management_system.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241013082114_ChangeSomeRelations")]
+    partial class ChangeSomeRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,11 +258,16 @@ namespace depi_real_state_management_system.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("TenantID1")
+                        .HasColumnType("int");
+
                     b.HasKey("LeaseID");
 
                     b.HasIndex("PropertyID");
 
                     b.HasIndex("TenantID");
+
+                    b.HasIndex("TenantID1");
 
                     b.ToTable("Leases");
                 });
@@ -289,11 +297,16 @@ namespace depi_real_state_management_system.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("TenantID1")
+                        .HasColumnType("int");
+
                     b.HasKey("PaymentID");
 
                     b.HasIndex("LeaseID");
 
                     b.HasIndex("TenantID");
+
+                    b.HasIndex("TenantID1");
 
                     b.ToTable("Payments");
                 });
@@ -340,6 +353,35 @@ namespace depi_real_state_management_system.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Properties");
+                });
+
+            modelBuilder.Entity("depi_real_state_management_system.Models.Tenant", b =>
+                {
+                    b.Property<int>("TenantID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TenantID"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TenantID");
+
+                    b.ToTable("Tenants");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -407,6 +449,10 @@ namespace depi_real_state_management_system.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("depi_real_state_management_system.Models.Tenant", null)
+                        .WithMany("Leases")
+                        .HasForeignKey("TenantID1");
+
                     b.Navigation("Property");
 
                     b.Navigation("Tenant");
@@ -425,6 +471,10 @@ namespace depi_real_state_management_system.Migrations
                         .HasForeignKey("TenantID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("depi_real_state_management_system.Models.Tenant", null)
+                        .WithMany("Payments")
+                        .HasForeignKey("TenantID1");
 
                     b.Navigation("Lease");
 
@@ -445,6 +495,13 @@ namespace depi_real_state_management_system.Migrations
             modelBuilder.Entity("depi_real_state_management_system.Models.Property", b =>
                 {
                     b.Navigation("Leases");
+                });
+
+            modelBuilder.Entity("depi_real_state_management_system.Models.Tenant", b =>
+                {
+                    b.Navigation("Leases");
+
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

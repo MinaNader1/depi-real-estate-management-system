@@ -4,15 +4,16 @@
     {
         public int LeaseID { get; set; }
         public int PropertyID { get; set; }  // Foreign Key
-        public int TenantID { get; set; }    // Foreign Key
+        public string TenantID { get; set; }  // Foreign Key, replaces 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int RentAmount { get; set; }
         public string PaymentFrequency { get; set; }
         public string Status { get; set; }
 
-        // Navigation properties for relationships
+        // Navigation properties
         public Property Property { get; set; } // Many-to-one relationship
-        public Tenant Tenant { get; set; }     // Many-to-one relationship
+        public ApplicationUser Tenant { get; set; }  // One-to-one relationship with ApplicationUser
     }
+
 }

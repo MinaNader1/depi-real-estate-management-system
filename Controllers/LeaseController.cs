@@ -1,98 +1,81 @@
-using Microsoft.AspNetCore.Mvc;
 using depi_real_state_management_system.Models;
-using System.Linq;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
 
 namespace depi_real_state_management_system.Controllers
 {
     public class LeaseController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public LeaseController(ApplicationDbContext context)
+        public LeaseController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        // List all leases
-        public IActionResult Index()
+        // GET: Lease/CreateBooking
+        [HttpGet]
+        public IActionResult CreateBooking()
         {
-            var leases = _context.Leases.ToList();
-            return View(leases);
+            var lease = new Lease
+            {
+                StartDate = DateTime.Now, // Set default start date to current date
+                EndDate = DateTime.Now.AddDays(1) // Set default end date to a day later, for example
+            };
+
+            return View(lease);
         }
 
-        // GET: Lease/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
 
-        // POST: Lease/Create
+        // POST: Lease/CreateBooking
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Lease lease)
+        public async Task<IActionResult> CreateBooking(Lease lease, int id)
         {
             if (ModelState.IsValid)
             {
-                _context.Leases.Add(lease);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
+                // Get the current logged-in user (tenant)
+                var user = await _userManager.GetUserAsync(User);
+
+                // Fetch the property based on the provided property ID (id)
+                var property = _context.Properties
+                                       .Include(p => p.Owner)
+                                       .FirstOrDefault(p => p.PropertyID == id);
+
+                if (property == null)
+                {
+                    ModelState.AddModelError("", "Property not found.");
+                    return View(lease);
+                }
+
+                var leases = new Lease
+                {
+                    TenantID = user.Id,
+                    PropertyID = property.PropertyID,
+                    StartDate = lease.StartDate,
+                    EndDate = lease.EndDate,
+                    // Set other lease properties if needed
+                };
+
+                _context.Leases.Add(leases);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("BookingConfirmation", new { id = leases.LeaseID });
             }
+
+            // If model state is not valid, return to the CreateBooking view with errors
             return View(lease);
         }
 
-        // GET: Lease/Edit/5
-        public IActionResult Edit(int id)
-        {
-            var lease = _context.Leases.Find(id);
-            if (lease == null)
-            {
-                return NotFound();
-            }
-            return View(lease);
-        }
 
-        // POST: Lease/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Lease lease)
+        // GET: Lease/BookingConfirmation
+        public IActionResult BookingConfirmation(int id)
         {
-            if (id != lease.LeaseID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                _context.Leases.Update(lease);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(lease);
-        }
-
-        // GET: Lease/Terminate/5
-        public IActionResult Terminate(int id)
-        {
-            var lease = _context.Leases.Find(id);
-            if (lease == null)
-            {
-                return NotFound();
-            }
-            return View(lease);
-        }
-
-        // POST: Lease/Terminate/5
-        [HttpPost, ActionName("Terminate")]
-        [ValidateAntiForgeryToken]
-        public IActionResult TerminateConfirmed(int id)
-        {
-            var lease = _context.Leases.Find(id);
-            if (lease != null)
-            {
-                _context.Leases.Remove(lease);
-                _context.SaveChanges();
-            }
-            return RedirectToAction(nameof(Index));
+            return View(id);
         }
     }
 }

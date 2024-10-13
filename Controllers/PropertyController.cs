@@ -1,4 +1,5 @@
 ﻿using depi_real_state_management_system.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ namespace depi_real_state_management_system.Controllers
 
 
         // Display form to create a new property
+        [Authorize(Roles ="Manager")]
         public IActionResult Create()
         {
             return View();

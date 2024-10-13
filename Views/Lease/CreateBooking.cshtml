@@ -1,0 +1,21 @@
+﻿@model Lease
+
+<div class="container">
+    <h2>Create Booking</h2>
+    <form asp-action="CreateBooking" method="post">
+        @* Automatically pass TenantID and PropertyID as hidden fields *@
+        <input type="hidden" asp-for="TenantID" />
+        <input type="hidden" asp-for="PropertyID" />
+
+        <div class="form-group">
+            <label asp-for="StartDate">Start Date</label>
+            <input type="date" asp-for="StartDate" class="form-control" required />
+        </div>
+        <div class="form-group">
+            <label asp-for="EndDate">End Date</label>
+            <input type="date" asp-for="EndDate" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Booking</button>
+    </form>
+</div>
