@@ -81,7 +81,7 @@ namespace depi_real_state_management_system.Controllers
 
             if (result.Succeeded)
             {
-                return Redirect("/home/index");
+                return Redirect("/property/index");
             }
             ViewBag.Status = 0;
             ViewBag.ErrorMessage = "Username or Password is incorrect";

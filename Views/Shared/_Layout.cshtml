@@ -32,19 +32,9 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Lease" asp-action="Index">Lease</a>
                         </li>
                         
-                        @if (!User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-                            </li>
-                        }
+                       
                         
-                        @if (!User.Identity.IsAuthenticated)
-                        {
-                             <li class="nav-item">
-                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
-                             </li>
-                        }
+                      
                        
                         @if (User.Identity.IsAuthenticated)
                         {

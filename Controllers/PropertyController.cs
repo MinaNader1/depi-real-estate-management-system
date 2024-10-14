@@ -6,14 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace depi_real_state_management_system.Controllers
 {
+    [Authorize(Roles ="Manager")]
     public class PropertyController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        public PropertyController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public PropertyController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _userManager = userManager;
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
@@ -44,35 +47,42 @@ namespace depi_real_state_management_system.Controllers
 
         // Add new property to the database
         [HttpPost]
-        public async Task<IActionResult> Create(Property property, IFormFile ImageFile)
+        public async Task<IActionResult> Create(PropertyViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // Get the currently logged-in user
-                var user = await _userManager.GetUserAsync(User);
-
-                // Set the OwnerId to the current user's Id
-                property.OwnerId = user.Id;
-
-                if (ImageFile != null && ImageFile.Length > 0)
+                // Save the uploaded image
+                string uniqueFileName = null;
+                if (model.Image != null)
                 {
-                    var fileName = Path.GetFileName(ImageFile.FileName);
-                    var filePath = Path.Combine("wwwroot/images", fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                    uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Image.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
-                        await ImageFile.CopyToAsync(stream);
+                        await model.Image.CopyToAsync(fileStream);
                     }
-
-                    property.ImageUrl = fileName;
                 }
+
+                // Create a new property instance
+                var property = new Property
+                {
+                    Location = model.Location,
+                    Size = model.Size,
+                    Price = model.Price,
+                    Description = model.Description,
+                    IsAvailable = model.IsAvailable,
+                    DateAdded = model.DateAdded,
+                    ImageUrl = uniqueFileName, // Save the image path
+                    OwnerId = model.OwnerId
+                };
 
                 _context.Properties.Add(property);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
-            return View(property);
+            return View(model);
         }
 
 
