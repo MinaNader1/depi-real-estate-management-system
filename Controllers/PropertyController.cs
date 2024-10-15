@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace depi_real_state_management_system.Controllers
 {
-    [Authorize(Roles ="Manager")]
     public class PropertyController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -69,7 +68,7 @@ namespace depi_real_state_management_system.Controllers
                 {
                     Location = model.Location,
                     Size = model.Size,
-                    Price = model.Price,
+                    PricePerNight = model.Price,
                     Description = model.Description,
                     IsAvailable = model.IsAvailable,
                     DateAdded = model.DateAdded,

@@ -15,6 +15,10 @@ namespace depi_real_state_management_system.Models
         [Range(1, int.MaxValue, ErrorMessage = "Price must be a positive number.")]
         public int Price { get; set; }
 
+        [Required(ErrorMessage = "Rent amount is required.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Rent amount must be a positive number.")]
+        public int RentAmount { get; set; }
+
         [Required(ErrorMessage = "Description is required.")]
         public string Description { get; set; }
 

@@ -1,21 +1,43 @@
 ﻿@model Lease
 
-<div class="container">
-    <h2>Create Booking</h2>
-    <form asp-action="CreateBooking" method="post">
-        @* Automatically pass TenantID and PropertyID as hidden fields *@
-        <input type="hidden" asp-for="TenantID" />
-        <input type="hidden" asp-for="PropertyID" />
+<h2>Book Property</h2>
 
-        <div class="form-group">
-            <label asp-for="StartDate">Start Date</label>
-            <input type="date" value="@Model.StartDate" class="form-control" required />
-        </div>
-        <div class="form-group">
-            <label asp-for="EndDate">End Date</label>
-            <input type="date" value="@Model.EndDate" class="form-control" required />
-        </div>
+<form asp-action="CreateBooking" method="post">
+    <input type="hidden" asp-for="PropertyID"/>
+    <input type="hidden" asp-for="TenantID" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"/>
+    <input asp-for="Status" type="hidden" value="Ongoing" />
+    <input asp-for="Tenant" type="hidden" value="@Model.Tenant" />
+    <input asp-for="Property" type="hidden" value="@Model.Property">
 
-        <button type="submit" class="btn btn-primary">Create Booking</button>
-    </form>
-</div>
+    <div class="form-group">
+        <label asp-for="StartDate"></label>
+        <input asp-for="StartDate" value="@Model.StartDate" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EndDate"></label>
+        <input asp-for="EndDate" value="@Model.EndDate" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Total Rent:</label>
+        @{
+            int nights = (Model.EndDate - Model.StartDate).Days;
+            int total_rent = (Model.Property != null) ? nights * Model.Property.PricePerNight : 0;
+            <input asp-for="TotalRentAmount" type="hidden" value="@total_rent" />
+            <p>@total_rent ₤</p>
+        }
+        
+    </div>
+    
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

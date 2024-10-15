@@ -5,7 +5,7 @@
     <div class="card-body">
         <h5 class="card-title">@Model.Location</h5>
         <p class="card-text">Size: @Model.Size</p>
-        <p class="card-text">Price: @Model.Price ₤</p>
+        <p class="card-text">Price: @Model.PricePerNight ₤</p>
         <p class="card-text">Description: @Model.Description</p>
         <p class="card-text">
             Owner: <a href="@Url.Action("Profile", "Account", new { id = Model.OwnerId })">@Model.Owner.UserName</a>
@@ -26,9 +26,7 @@
 
         @if (Model.IsAvailable)
         {
-            <form action="@Url.Action("CreateBooking", "Lease", new { id = Model.PropertyID })" method="post">
-                <button type="submit" class="btn btn-primary">Book</button>
-            </form>
+            <a asp-action="CreateBooking" asp-controller="Lease" asp-route-id="@Model.PropertyID" class="btn btn-primary">Book</a>
         }
         else
         {

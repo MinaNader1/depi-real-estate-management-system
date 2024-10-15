@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace depi_real_state_management_system.Models
@@ -15,27 +17,24 @@ namespace depi_real_state_management_system.Models
 
         [Required(ErrorMessage = "Price is required.")]
         [Range(1, int.MaxValue, ErrorMessage = "Price must be a positive number.")]
-        public int Price { get; set; }
+        public int PricePerNight { get; set; } // Renamed to clarify this is price per night
 
         [Required(ErrorMessage = "Description is required.")]
         public string Description { get; set; }
 
-        public bool IsAvailable { get; set; } = true; // Default to true if not specified
+        public bool IsAvailable { get; set; } = true;
 
         [DataType(DataType.Date)]
-        public DateTime DateAdded { get; set; } = DateTime.Now; // Set default value
+        public DateTime DateAdded { get; set; } = DateTime.Now;
 
         [Url(ErrorMessage = "Invalid Image URL.")]
         public string ImageUrl { get; set; }
 
-        // Foreign key for ApplicationUser (Owner)
         [ForeignKey("Owner")]
         public string OwnerId { get; set; }
 
-        // Navigation property for ApplicationUser
         public virtual ApplicationUser Owner { get; set; }
 
-        // Navigation property for Leases
         public ICollection<Lease> Leases { get; set; }
     }
 }
