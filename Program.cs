@@ -24,6 +24,8 @@ builder.Services.ConfigureApplicationCookie(option =>
     option.SlidingExpiration = true;
 });
 
+builder.Services.AddHostedService<LeaseStatusBackgroundService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

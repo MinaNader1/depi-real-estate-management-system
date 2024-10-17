@@ -13,12 +13,14 @@ namespace depi_real_state_management_system.Controllers
         private readonly SignInManager<ApplicationUser> _SignInManager;
         private readonly RoleManager<IdentityRole> _RoleManager;
         private readonly ApplicationDbContext _context;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _UserManager = userManager;
             _SignInManager = signInManager;
             _RoleManager = roleManager;
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
         //-----------------------------------------Authentication---------------------------------------
         public async Task<IActionResult> Register()
@@ -34,12 +36,35 @@ namespace depi_real_state_management_system.Controllers
         }
 
         [HttpPost]
-        [HttpPost]
-        public async Task<IActionResult> ConfirmRegister(ApplicationUser user, string ConfirmPassword, string RoleId)
+        public async Task<IActionResult> ConfirmRegister(ApplicationUser user, string ConfirmPassword, string RoleId, IFormFile? ProfileImage)
         {
             // Check if the confirmed password matches
-            if (ConfirmPassword == user.PasswordHash)
+            if (user.PasswordHash != null && ConfirmPassword == user.PasswordHash)
             {
+                // Check if a profile image is uploaded
+                if (ProfileImage != null && ProfileImage.Length > 0)
+                {
+                    // Define the path to save the uploaded image
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profilesimg");
+                    Directory.CreateDirectory(uploadsFolder); // Ensure the folder exists
+
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(ProfileImage.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    // Save the image file to the wwwroot/profilesimg folder
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ProfileImage.CopyToAsync(fileStream);
+                    }
+
+                    // Set the ProfileImage property to the file name
+                    user.ProfileImage = uniqueFileName;
+                }
+                else
+                {
+                    user.ProfileImage = null; // Explicitly set to null if no image is uploaded
+                }
+
                 // Add the user to the database with the specified password
                 var addUser = await _UserManager.CreateAsync(user, user.PasswordHash);
 
@@ -65,6 +90,8 @@ namespace depi_real_state_management_system.Controllers
             // If something goes wrong, show an error view
             return RedirectToAction("Error");
         }
+
+
 
 
         public IActionResult Login()
@@ -118,17 +145,119 @@ namespace depi_real_state_management_system.Controllers
                 return NotFound();
             }
 
-            // Fetch the properties owned by the user
-            var userProperties = await _context.Properties
-                                               .Where(p => p.OwnerId == id)
-                                               .ToListAsync();
+            // Check if the user is a manager (can own properties)
+            var roles = await _UserManager.GetRolesAsync(user);
+            bool isManager = roles.Contains("Manager");
 
-            // Pass the user and properties to the view using ViewBag
+            // Create lists for owned and booked properties
+            List<Property> ownedProperties = new List<Property>();
+            List<Property> bookedProperties = new List<Property>();
+
+            // Fetch properties owned by the manager
+            if (isManager)
+            {
+                ownedProperties = await _context.Properties
+                                                .Where(p => p.OwnerId == id)
+                                                .ToListAsync();
+            }
+
+            // Fetch properties booked by the user (manager or tenant)
+            bookedProperties = await (from lease in _context.Leases
+                                      join property in _context.Properties on lease.PropertyID equals property.PropertyID
+                                      where lease.TenantID == id
+                                      select property).ToListAsync();
+
+            // Pass the user, owned properties, and booked properties to the view using ViewBag
             ViewBag.User = user;
-            ViewBag.Properties = userProperties;
+            ViewBag.OwnedProperties = ownedProperties;
+            ViewBag.BookedProperties = bookedProperties;
+            ViewBag.IsManager = isManager;
+
+            // Assuming you have a field in ApplicationUser for ProfileImage
+            ViewBag.ProfileImagePath = $"/profilesimg/{user.ProfileImage ?? "default.jpg"}"; // default.png is a placeholder image
 
             return View();
         }
+
+
+
+        public async Task<IActionResult> EditProfile(string id)
+        {
+            var user = await _UserManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditProfileViewModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                ProfileImage = null // Ensure it's nullable in the view model
+            };
+
+            return View(model);
+        }
+
+        // POST: EditProfile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _UserManager.FindByIdAsync(model.Id);
+                if (user != null)
+                {
+                    user.UserName = model.UserName;
+                    user.Email = model.Email;
+
+                    // Handle profile image upload
+                    if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+                    {
+                        // Define the path to save the uploaded image
+                        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "profilesimg");
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfileImage.FileName);
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        // Delete old image if exists
+                        if (!string.IsNullOrEmpty(user.ProfileImage))
+                        {
+                            var oldImagePath = Path.Combine(uploadsFolder, user.ProfileImage);
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
+
+                        // Save the new image
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.ProfileImage.CopyToAsync(fileStream);
+                        }
+
+                        // Update user's profile image property
+                        user.ProfileImage = uniqueFileName;
+                    }
+                    else
+                    {
+                        user.ProfileImage = null; // Explicitly set to null if no image is uploaded
+                    }
+
+                    var result = await _UserManager.UpdateAsync(user);
+                    if (result.Succeeded)
+                    {
+                        // Redirect to the profile page after success
+                        return RedirectToAction("Profile", new { id = user.Id });
+                    }
+                }
+            }
+
+            // If we got this far, something failed, redisplay the form
+            return View(model);
+        }
+
 
 
         public IActionResult Error()

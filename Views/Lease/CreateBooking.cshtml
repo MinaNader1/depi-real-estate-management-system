@@ -2,42 +2,98 @@
 
 <h2>Book Property</h2>
 
-<form asp-action="CreateBooking" method="post">
-    <input type="hidden" asp-for="PropertyID"/>
-    <input type="hidden" asp-for="TenantID" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"/>
+<form id="bookingForm" asp-action="CreateBooking" method="post">
+    <input type="hidden" asp-for="PropertyID" />
+    <input type="hidden" asp-for="TenantID" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
     <input asp-for="Status" type="hidden" value="Ongoing" />
     <input asp-for="Tenant" type="hidden" value="@Model.Tenant" />
-    <input asp-for="Property" type="hidden" value="@Model.Property">
+    <input asp-for="Property" type="hidden" value="@Model.Property" />
 
     <div class="form-group">
         <label asp-for="StartDate"></label>
-        <input asp-for="StartDate" value="@Model.StartDate" class="form-control" />
+        <input asp-for="StartDate" id="startDate" class="form-control" />
     </div>
 
     <div class="form-group">
         <label asp-for="EndDate"></label>
-        <input asp-for="EndDate" value="@Model.EndDate" class="form-control" />
+        <input asp-for="EndDate" id="endDate" class="form-control" />
     </div>
 
     <div class="form-group">
         <label>Total Rent:</label>
-        @{
-            int nights = (Model.EndDate - Model.StartDate).Days;
-            int total_rent = (Model.Property != null) ? nights * Model.Property.PricePerNight : 0;
-            <input asp-for="TotalRentAmount" type="hidden" value="@total_rent" />
-            <p>@total_rent ₤</p>
-        }
-        
+        <input asp-for="TotalRentAmount" id="totalRent" type="hidden" value="0" />
+        <p id="totalRentDisplay">0 ₤</p>
     </div>
-    
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="button" id="submitBtn" class="btn btn-primary">Submit</button>
 </form>
 
-
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirm Booking</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to book this property? The total rent amount is <strong id="modalTotalRent">0 ₤</strong>.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmBookingBtn">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Function to calculate total rent
+        function calculateTotalRent() {
+            var startDate = new Date($('#startDate').val());
+            var endDate = new Date($('#endDate').val());
+            var oneDay = 24 * 60 * 60 * 1000; // Hours*minutes*seconds*milliseconds
+            var nights = Math.round((endDate - startDate) / oneDay);
+            var pricePerNight = @Model.Property.PricePerNight;
+
+            if (nights > 0) {
+                var totalRent = nights * pricePerNight;
+                $('#totalRent').val(totalRent);  // Set the hidden input value
+                $('#totalRentDisplay').text(totalRent + ' ₤');  // Display the total rent
+            } else {
+                $('#totalRent').val(0);
+                $('#totalRentDisplay').text('0 ₤');
+            }
+        }
+
+        // Trigger the calculation when start or end date changes
+        $('#startDate, #endDate').on('change', function () {
+            calculateTotalRent();
+        });
+
+        // Show Bootstrap modal for confirmation
+        $('#submitBtn').on('click', function () {
+            var totalRent = $('#totalRent').val();
+
+            if (totalRent > 0) {
+                $('#modalTotalRent').text(totalRent + ' ₤');
+                $('#confirmModal').modal('show'); // Show the modal
+            } else {
+                alert("Please select valid start and end dates.");
+            }
+        });
+
+        // Confirm booking when modal confirmation button is clicked
+        $('#confirmBookingBtn').on('click', function () {
+            $('#bookingForm').submit();  // Submit the form
+        });
+    </script>
 }

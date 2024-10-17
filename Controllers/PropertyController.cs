@@ -50,9 +50,9 @@ namespace depi_real_state_management_system.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Save the uploaded image
+                // Save the uploaded image if it exists
                 string uniqueFileName = null;
-                if (model.Image != null)
+                if (model.Image != null && model.Image.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
                     uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Image.FileName;
@@ -72,7 +72,7 @@ namespace depi_real_state_management_system.Controllers
                     Description = model.Description,
                     IsAvailable = model.IsAvailable,
                     DateAdded = model.DateAdded,
-                    ImageUrl = uniqueFileName, // Save the image path
+                    ImageUrl = uniqueFileName, // Save the image path or null
                     OwnerId = model.OwnerId
                 };
 
@@ -83,6 +83,38 @@ namespace depi_real_state_management_system.Controllers
 
             return View(model);
         }
+
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var property = await _context.Properties.FindAsync(id);
+
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            return View(property);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, Property updatedProperty)
+        {
+            if (id != updatedProperty.PropertyID)
+            {
+                return BadRequest();
+            }
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(updatedProperty);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Profile", new { id = updatedProperty.OwnerId });
+            }
+
+            return View(updatedProperty);
+        }
+
 
 
     }

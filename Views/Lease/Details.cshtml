@@ -1,68 +1,86 @@
 ﻿@model depi_real_state_management_system.Models.Lease
 
-<h2>Lease Details</h2>
+<h2 class="mb-4">Lease Details</h2>
 
-<div>
-    <h4>Lease</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            Property Location
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Property.Location
-        </dd>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h4 class="card-title">Lease Information</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3 font-weight-bold">
+                Property Location:
+            </dt>
+            <dd class="col-sm-9">
+                @Model.Property.Location
+            </dd>
 
-        <dt class="col-sm-2">
-            Tenant Name
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Tenant.UserName
-        </dd>
+            <dt class="col-sm-3 font-weight-bold">
+                Tenant Name:
+            </dt>
+            <dd class="col-sm-9">
+                @Model.Tenant.UserName
+            </dd>
 
-        <dt class="col-sm-2">
-            Rent Amount
-        </dt>
-        <dd class="col-sm-10">
-            @Model.TotalRentAmount
-        </dd>
+            <dt class="col-sm-3 font-weight-bold">
+                Rent Amount:
+            </dt>
+            <dd class="col-sm-9">
+                @Model.TotalRentAmount ₤
+            </dd>
 
-        <dt class="col-sm-2">
-            Payment Frequency
-        </dt>
+            <dt class="col-sm-3 font-weight-bold">
+                Start Date:
+            </dt>
+            <dd class="col-sm-9">
+                @Model.StartDate.ToShortDateString()
+            </dd>
 
-        <dt class="col-sm-2">
-            Start Date
-        </dt>
-        <dd class="col-sm-10">
-            @Model.StartDate.ToShortDateString()
-        </dd>
+            <dt class="col-sm-3 font-weight-bold">
+                End Date:
+            </dt>
+            <dd class="col-sm-9">
+                @Model.EndDate.ToShortDateString()
+            </dd>
 
-        <dt class="col-sm-2">
-            End Date
-        </dt>
-        <dd class="col-sm-10">
-            @Model.EndDate.ToShortDateString()
-        </dd>
+            <dt class="col-sm-3 font-weight-bold">
+                Status:
+            </dt>
+            <dd class="col-sm-9">
+                <span class="badge @GetStatusBadgeClass(@Model.Status)">@Model.Status</span>
+            </dd>
+        </dl>
 
-        <dt class="col-sm-2">
-            Status
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Status
-        </dd>
-    </dl>
+        @if (Model.Status == "Ongoing" && DateTime.Now < Model.StartDate.AddDays(-2))
+        {
+            <form asp-action="TerminateLease" method="post" class="mt-3">
+                <input type="hidden" name="leaseId" value="@Model.LeaseID" />
+                <button type="submit" class="btn btn-danger">Terminate Lease</button>
+            </form>
+        }
+    </div>
+</div>
 
-    @if (Model.Status == "Ongoing" && DateTime.Now < Model.StartDate.AddDays(-2))
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+}
+
+@functions {
+    // Function to return badge class based on status
+    private string GetStatusBadgeClass(string status)
     {
-        <form asp-action="TerminateLease" method="post">
-            <input type="hidden" name="leaseId" value="@Model.LeaseID" />
-            <button type="submit" class="btn btn-danger">Terminate Lease</button>
-        </form>
+        return status switch
+        {
+            "Ongoing" => "badge-success",
+            "Terminated" => "badge-danger",
+            "Completed" => "badge-info",
+            _ => "badge-secondary"
+        };
     }
-
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+}

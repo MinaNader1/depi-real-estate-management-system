@@ -47,3 +47,14 @@ button.accept-policy {
     white-space: nowrap;
     line-height: 60px;
 }
+
+.navbar .dropdown-menu-end {
+    right: 0;
+    left: auto;
+}
+
+.navbar img.rounded-circle {
+    border: 2px solid #e5e5e5;
+    object-fit: cover;
+}
+

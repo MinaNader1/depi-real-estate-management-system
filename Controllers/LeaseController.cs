@@ -2,6 +2,7 @@ using depi_real_state_management_system.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace depi_real_state_management_system.Controllers
 {
@@ -46,6 +47,7 @@ namespace depi_real_state_management_system.Controllers
         public async Task<IActionResult> CreateBooking(int id)
         {
             var property = await _context.Properties.FindAsync(id);
+            var tenant = await _userManager.GetUserAsync(User);
             if (property == null)
             {
                 return NotFound();
@@ -54,6 +56,8 @@ namespace depi_real_state_management_system.Controllers
             var lease = new Lease
             {
                 PropertyID = id,
+                Property = property,
+                Tenant = tenant,
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(1), // Default to 1-night booking
             };
@@ -73,9 +77,6 @@ namespace depi_real_state_management_system.Controllers
 
                 return RedirectToAction(nameof(Index));  // Redirect to a confirmation page or list of properties
             }
-
-            lease.Property = await _context.Properties.FindAsync(lease.PropertyID);
-            lease.Tenant = await _context.Users.FindAsync(lease.TenantID);
 
             // If ModelState is not valid, return the form with validation errors
             return View(lease);

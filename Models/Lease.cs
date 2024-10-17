@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace depi_real_state_management_system.Models
@@ -23,9 +22,9 @@ namespace depi_real_state_management_system.Models
         public int TotalRentAmount { get; set; }
 
         // Navigation properties
-        public Property Property { get; set; }
+        public Property? Property { get; set; }
 
-        public ApplicationUser Tenant { get; set; }
+        public ApplicationUser? Tenant { get; set; }
 
         // Method to calculate the status of the lease
         public void UpdateStatus()

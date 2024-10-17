@@ -1,24 +1,56 @@
 ﻿@{
     var user = ViewBag.User as ApplicationUser;
-    var properties = ViewBag.Properties as List<Property>;
+    var ownedProperties = ViewBag.OwnedProperties as List<Property> ?? new List<Property>();
+    var bookedProperties = ViewBag.BookedProperties as List<Property> ?? new List<Property>();
+    var isManager = ViewBag.IsManager ?? false;
 }
 
 <h2>@user.UserName's Profile</h2>
 
+<!-- Profile Image -->
+<img src="@(ViewBag.ProfileImagePath ?? Url.Content("/profilesimg/default.jpg"))" alt="Profile Image" class="rounded-circle" width="150" height="150" />
+
 <p><strong>Email:</strong> @user.Email</p>
 <p><strong>Full Name:</strong> @user.UserName</p>
 
-<h3>Properties Owned</h3>
-@if (properties != null && properties.Count > 0)
+@if (isManager)
 {
+    <h3>Properties Owned</h3>
+
+    @if (ownedProperties.Count > 0)
+    {
         <ul>
-        @foreach (var property in properties)
+            @foreach (var property in ownedProperties)
+            {
+                <li>
+                    @Html.ActionLink(property.Location, "Details", "Property", new { id = property.PropertyID }, null)
+
+                    <!-- Display the Edit button for owned properties -->
+                    @Html.ActionLink("Edit", "Edit", "Property", new { id = property.PropertyID }, new { @class = "btn btn-primary btn-sm" })
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No owned properties.</p>
+    }
+}
+
+<h3>Properties Booked</h3>
+
+@if (bookedProperties.Count > 0)
+{
+    <ul>
+        @foreach (var property in bookedProperties)
         {
             <li>@Html.ActionLink(property.Location, "Details", "Property", new { id = property.PropertyID }, null)</li>
         }
-        </ul>
+    </ul>
 }
 else
 {
-    <p>No properties owned.</p>
+    <p>No booked properties.</p>
 }
+
+<a class="btn btn-primary" asp-area="" asp-controller="Account" asp-action="EditProfile" asp-route-id="@user.Id">Edit Personal Info</a>

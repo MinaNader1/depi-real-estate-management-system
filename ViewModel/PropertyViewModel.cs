@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace depi_real_state_management_system.Models
 {
@@ -27,7 +26,7 @@ namespace depi_real_state_management_system.Models
         public DateTime DateAdded { get; set; } = DateTime.Now;
 
         [Required(ErrorMessage = "Image is required.")]
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
 
         public string OwnerId { get; set; }
     }
