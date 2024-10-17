@@ -2,7 +2,6 @@ using depi_real_state_management_system.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace depi_real_state_management_system.Controllers
 {
@@ -72,17 +71,31 @@ namespace depi_real_state_management_system.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Validate the start date
+                if (lease.StartDate.Date < DateTime.Now.Date)
+                {
+                    ModelState.AddModelError("StartDate", "Start date cannot be in the past.");
+                    return View(lease); // Return the form with validation errors
+                }
+
+                // You may want to validate that the end date is also after the start date
+                if (lease.EndDate.Date <= lease.StartDate.Date)
+                {
+                    ModelState.AddModelError("EndDate", "End date must be after the start date.");
+                    return View(lease); // Return the form with validation errors
+                }
+
                 _context.Leases.Add(lease);  // Add the lease to the context
                 await _context.SaveChangesAsync();  // Save changes to the database
 
-                return RedirectToAction(nameof(Index));  // Redirect to a confirmation page or list of properties
+                return RedirectToAction("Details", new { id = lease.LeaseID });  // Redirect to a details page
             }
 
             // If ModelState is not valid, return the form with validation errors
             return View(lease);
         }
 
-
+      
 
         // Optional: Logic to terminate the lease before 2 days
         [HttpPost]

@@ -115,6 +115,24 @@ namespace depi_real_state_management_system.Controllers
             return View(updatedProperty);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(string propertyId)
+        {
+            // Convert the propertyId from string to int
+            if (int.TryParse(propertyId, out int id))
+            {
+                var property = await _context.Properties.FindAsync(id);
+                if (property != null)
+                {
+                    _context.Properties.Remove(property);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index"); // Redirect to the appropriate page after deletion
+                }
+            }
+
+            return NotFound();
+        }
+
 
 
     }

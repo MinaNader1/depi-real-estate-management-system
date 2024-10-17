@@ -17,8 +17,6 @@ namespace depi_real_state_management_system.Models
 
         public string Status { get; set; }
 
-        // Calculated field for total rent amount
-        [NotMapped]
         public int TotalRentAmount { get; set; }
 
         // Navigation properties
