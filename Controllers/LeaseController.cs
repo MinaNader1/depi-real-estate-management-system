@@ -38,6 +38,9 @@ namespace depi_real_state_management_system.Controllers
                 return NotFound();
             }
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            ViewBag.currentUserID = currentUser.Id;
+
             return View(lease);
         }
 

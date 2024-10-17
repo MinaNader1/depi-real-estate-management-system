@@ -167,11 +167,14 @@ namespace depi_real_state_management_system.Controllers
                                       where lease.TenantID == id
                                       select property).ToListAsync();
 
+            var leases = await _context.Leases.Where(l => l.TenantID == user.Id).ToListAsync();
+
             // Pass the user, owned properties, and booked properties to the view using ViewBag
             ViewBag.User = user;
             ViewBag.OwnedProperties = ownedProperties;
             ViewBag.BookedProperties = bookedProperties;
             ViewBag.IsManager = isManager;
+            ViewBag.Leases = leases;
 
             // Assuming you have a field in ApplicationUser for ProfileImage
             ViewBag.ProfileImagePath = $"/profilesimg/{user.ProfileImage ?? "default.jpg"}"; // default.png is a placeholder image
@@ -194,6 +197,7 @@ namespace depi_real_state_management_system.Controllers
                 Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
                 ProfileImage = null // Ensure it's nullable in the view model
             };
 
@@ -212,6 +216,7 @@ namespace depi_real_state_management_system.Controllers
                 {
                     user.UserName = model.UserName;
                     user.Email = model.Email;
+                    user.PhoneNumber = model.PhoneNumber;
 
                     // Handle profile image upload
                     if (model.ProfileImage != null && model.ProfileImage.Length > 0)

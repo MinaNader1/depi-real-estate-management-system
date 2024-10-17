@@ -3,6 +3,7 @@
     var ownedProperties = ViewBag.OwnedProperties as List<Property> ?? new List<Property>();
     var bookedProperties = ViewBag.BookedProperties as List<Property> ?? new List<Property>();
     var isManager = ViewBag.IsManager ?? false;
+    var leases = ViewBag.Leases as List<Lease> ?? new List<Lease>();
 }
 
 <h2>@user.UserName's Profile</h2>
@@ -12,6 +13,7 @@
 
 <p><strong>Email:</strong> @user.Email</p>
 <p><strong>Full Name:</strong> @user.UserName</p>
+<p><strong>Phone Number:</strong> @user.PhoneNumber</p>
 
 @if (isManager)
 {
@@ -49,7 +51,13 @@
     <ul>
         @foreach (var property in bookedProperties)
         {
-            <li>@Html.ActionLink(property.Location, "Details", "Property", new { id = property.PropertyID }, null)</li>
+            var lease = leases.FirstOrDefault(l => l.PropertyID == property.PropertyID); // Assuming the lease info is available
+            if (lease != null)
+            {
+                <li>
+                    @Html.ActionLink(property.Location, "Details", "Lease", new { id = lease.LeaseID }, null)
+                </li>
+            }
         }
     </ul>
 }
@@ -57,6 +65,7 @@ else
 {
     <p>No booked properties.</p>
 }
+
 
 <a class="btn btn-primary" asp-area="" asp-controller="Account" asp-action="EditProfile" asp-route-id="@user.Id">Edit Personal Info</a>
 
