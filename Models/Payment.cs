@@ -1,4 +1,4 @@
-﻿namespace depi_real_state_management_system.Models
+namespace depi_real_state_management_system.Models
 {
     public class Payment
     {
@@ -9,9 +9,8 @@
         public DateTime PaymentDate { get; set; }
         public string PaymentStatus { get; set; }
 
-        // Navigation properties
+        
         public ApplicationUser Tenant { get; set; }  // One-to-one relationship
         public Lease Lease { get; set; }    // Many-to-one relationship
     }
-
 }
