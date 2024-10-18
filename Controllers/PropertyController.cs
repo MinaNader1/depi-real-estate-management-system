@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace depi_real_state_management_system.Controllers
 {
@@ -52,7 +53,7 @@ namespace depi_real_state_management_system.Controllers
             if (ModelState.IsValid)
             {
                 // Save the uploaded image if it exists
-                string uniqueFileName = null;
+                string uniqueFileName = null!;
                 if (model.Image != null && model.Image.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
@@ -73,7 +74,7 @@ namespace depi_real_state_management_system.Controllers
                     Description = model.Description,
                     IsAvailable = model.IsAvailable,
                     DateAdded = model.DateAdded,
-                    ImageUrl = uniqueFileName, // Save the image path or null
+                    ImageUrl = uniqueFileName!, // Save the image path or null
                     OwnerId = model.OwnerId
                 };
 
@@ -105,14 +106,12 @@ namespace depi_real_state_management_system.Controllers
             {
                 return BadRequest();
             }
-
             if (ModelState.IsValid)
             {
                 _context.Update(updatedProperty);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Profile", new { id = updatedProperty.OwnerId });
             }
-
             return View(updatedProperty);
         }
 
@@ -133,8 +132,5 @@ namespace depi_real_state_management_system.Controllers
 
             return NotFound();
         }
-
-
-
     }
 }

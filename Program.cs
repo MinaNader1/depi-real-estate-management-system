@@ -1,3 +1,4 @@
+using depi_real_state_management_system;
 using depi_real_state_management_system.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<RolesSeedData>();
 
 builder.Services.ConfigureApplicationCookie(option =>
 {
@@ -35,6 +38,12 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var seedData = scope.ServiceProvider.GetRequiredService<RolesSeedData>();
+    await seedData.AddRoles();
 }
 
 app.UseHttpsRedirection();
