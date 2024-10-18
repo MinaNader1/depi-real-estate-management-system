@@ -25,74 +25,68 @@ namespace depi_real_state_management_system.Controllers
         //-----------------------------------------Authentication---------------------------------------
         public async Task<IActionResult> Register()
         {
-            ApplicationUser user = new ApplicationUser();
+            ViewBag.Roles = await _RoleManager.Roles
+                .Where(r => r.Name != "Admin")
+                .Select(r => new { Value = r.Id, Text = r.Name })
+                .ToListAsync();
+                
+            return View(new RegisterViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmRegister(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber
+                };
+
+                if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profilesimg");
+                    Directory.CreateDirectory(uploadsFolder); // Ensure the folder exists
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfileImage.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ProfileImage.CopyToAsync(fileStream);
+                    }
+
+                    user.ProfileImage = uniqueFileName;
+                }
+
+                var result = await _UserManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    var role = await _RoleManager.FindByIdAsync(model.RoleId);
+                    if (role != null)
+                    {
+                        await _UserManager.AddToRoleAsync(user, role.Name);
+                        return RedirectToAction("Login");
+                    }
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            // If ModelState is invalid, re-render the view with errors
             ViewBag.Roles = await _RoleManager.Roles
                 .Select(role => new SelectListItem
                 {
                     Value = role.Id,
                     Text = role.Name
                 }).ToListAsync();
-            return View(user);
+            return View("Register", model);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> ConfirmRegister(ApplicationUser user, string ConfirmPassword, string RoleId, IFormFile? ProfileImage)
-        {
-            // Check if the confirmed password matches
-            if (user.PasswordHash != null && ConfirmPassword == user.PasswordHash)
-            {
-                // Check if a profile image is uploaded
-                if (ProfileImage != null && ProfileImage.Length > 0)
-                {
-                    // Define the path to save the uploaded image
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profilesimg");
-                    Directory.CreateDirectory(uploadsFolder); // Ensure the folder exists
-
-                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(ProfileImage.FileName);
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    // Save the image file to the wwwroot/profilesimg folder
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await ProfileImage.CopyToAsync(fileStream);
-                    }
-
-                    // Set the ProfileImage property to the file name
-                    user.ProfileImage = uniqueFileName;
-                }
-                else
-                {
-                    user.ProfileImage = null; // Explicitly set to null if no image is uploaded
-                }
-
-                // Add the user to the database with the specified password
-                var addUser = await _UserManager.CreateAsync(user, user.PasswordHash);
-
-                // If the user was successfully created
-                if (addUser.Succeeded)
-                {
-                    // Retrieve the role using RoleId
-                    var role = await _RoleManager.FindByIdAsync(RoleId);
-
-                    if (role != null)
-                    {
-                        // Add the user to the role by its name
-                        var result = await _UserManager.AddToRoleAsync(user, role.Name);
-
-                        if (result.Succeeded)
-                        {
-                            return RedirectToAction("Login");
-                        }
-                    }
-                }
-            }
-
-            // If something goes wrong, show an error view
-            return RedirectToAction("Error");
-        }
-
-
-
 
         public IActionResult Login()
         {

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace depi_real_state_management_system.Controllers
 {
+    [Authorize]
     public class PropertyController : Controller
     {
         private readonly ApplicationDbContext _context;

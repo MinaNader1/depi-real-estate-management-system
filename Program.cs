@@ -26,6 +26,7 @@ builder.Services.ConfigureApplicationCookie(option =>
 
 builder.Services.AddHostedService<LeaseStatusBackgroundService>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -46,6 +47,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Property}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
