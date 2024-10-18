@@ -44,6 +44,51 @@
         <span asp-validation-for="Image" class="text-danger"></span>
     </div>
 
+    <div class="mb-3">
+        <h4>What this place offers:</h4>
+        <div class="form-check">
+            <input asp-for="HasKitchen" type="checkbox" class="form-check-input" id="kitchen">
+            <label class="form-check-label" for="kitchen">Kitchen</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasDedicatedWorkspace" type="checkbox" class="form-check-input" id="dedicatedWorkspace">
+            <label class="form-check-label" for="dedicatedWorkspace">Dedicated workspace</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasDryer" type="checkbox" class="form-check-input" id="dryer">
+            <label class="form-check-label" for="dryer">Dryer</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasIndoorFireplace" type="checkbox" class="form-check-input" id="indoorFireplace">
+            <label class="form-check-label" for="indoorFireplace">Indoor fireplace</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasHairDryer" type="checkbox" class="form-check-input" id="hairDryer">
+            <label class="form-check-label" for="hairDryer">Hair dryer</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasWifi" type="checkbox" class="form-check-input" id="wifi">
+            <label class="form-check-label" for="wifi">Wifi</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasWasher" type="checkbox" class="form-check-input" id="washer">
+            <label class="form-check-label" for="washer">Washer</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasBackyard" type="checkbox" class="form-check-input" id="backyard">
+            <label class="form-check-label" for="backyard">Backyard</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="AllowsLuggageDropoff" type="checkbox" class="form-check-input" id="luggageDropoff">
+            <label class="form-check-label" for="luggageDropoff">Luggage dropoff allowed</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="HasLockOnBedroomDoor" type="checkbox" class="form-check-input" id="lockOnBedroomDoor">
+            <label class="form-check-label" for="lockOnBedroomDoor">Lock on bedroom door</label>
+        </div>
+    </div>
+
+
     <!-- Hidden OwnerId field (passed from the view) -->
     <input asp-for="OwnerId" type="hidden" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
 

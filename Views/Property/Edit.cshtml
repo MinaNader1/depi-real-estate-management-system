@@ -1,4 +1,4 @@
-﻿@model Property
+﻿@model PropertyViewModel
 
 @{
     ViewData["Title"] = "Edit Property";
@@ -6,7 +6,11 @@
 
 <h2>Edit Property</h2>
 
-<form asp-action="Edit" method="post">
+<div>
+    <img src="/images/@Model.Image" alt="Property Image" width="200" />
+</div>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="Location" class="control-label"></label>
         <input asp-for="Location" class="form-control" />
@@ -20,9 +24,9 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="PricePerNight" class="control-label"></label>
-        <input asp-for="PricePerNight" class="form-control" />
-        <span asp-validation-for="PricePerNight" class="text-danger"></span>
+        <label asp-for="Price" class="control-label"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
     </div>
 
     <div class="form-group">
@@ -37,14 +41,67 @@
         <span asp-validation-for="IsAvailable" class="text-danger"></span>
     </div>
 
-    <input type="hidden" asp-for="PropertyID" />
+    <!-- Property Offers -->
+    <div class="form-group form-check">
+        <input asp-for="HasKitchen" class="form-check-input" type="checkbox" />
+        <label asp-for="HasKitchen" class="form-check-label">Kitchen</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasDedicatedWorkspace" class="form-check-input" type="checkbox" />
+        <label asp-for="HasDedicatedWorkspace" class="form-check-label">Dedicated Workspace</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasDryer" class="form-check-input" type="checkbox" />
+        <label asp-for="HasDryer" class="form-check-label">Dryer</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasIndoorFireplace" class="form-check-input" type="checkbox" />
+        <label asp-for="HasIndoorFireplace" class="form-check-label">Indoor Fireplace</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasHairDryer" class="form-check-input" type="checkbox" />
+        <label asp-for="HasHairDryer" class="form-check-label">Hair Dryer</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasWifi" class="form-check-input" type="checkbox" />
+        <label asp-for="HasWifi" class="form-check-label">Wifi</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasWasher" class="form-check-input" type="checkbox" />
+        <label asp-for="HasWasher" class="form-check-label">Washer</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasBackyard" class="form-check-input" type="checkbox" />
+        <label asp-for="HasBackyard" class="form-check-label">Backyard</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="AllowsLuggageDropoff" class="form-check-input" type="checkbox" />
+        <label asp-for="AllowsLuggageDropoff" class="form-check-label">Allows Luggage Dropoff</label>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="HasLockOnBedroomDoor" class="form-check-input" type="checkbox" />
+        <label asp-for="HasLockOnBedroomDoor" class="form-check-label">Lock on Bedroom Door</label>
+    </div>
+
+    <!-- For image upload -->
+    <div class="form-group">
+        <label asp-for="Image" class="control-label"></label>
+        <input asp-for="Image" type="file" class="form-control" />
+        <span asp-validation-for="Image" class="text-danger"></span>
+    </div>
+
+
+    <input type="hidden" asp-for="OwnerId" />
 
     <button type="submit" class="btn btn-primary">Save</button>
     @Html.ActionLink("Cancel", "Profile", "Account", new { id = Model.OwnerId }, new { @class = "btn btn-secondary" })
 </form>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

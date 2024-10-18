@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 
 namespace depi_real_state_management_system.Controllers
 {
@@ -65,7 +64,7 @@ namespace depi_real_state_management_system.Controllers
                     }
                 }
 
-                // Create a new property instance
+                // Create a new property instance with the new fields
                 var property = new Property
                 {
                     Location = model.Location,
@@ -75,7 +74,18 @@ namespace depi_real_state_management_system.Controllers
                     IsAvailable = model.IsAvailable,
                     DateAdded = model.DateAdded,
                     ImageUrl = uniqueFileName!, // Save the image path or null
-                    OwnerId = model.OwnerId
+                    OwnerId = model.OwnerId,
+                    // Offers
+                    HasKitchen = model.HasKitchen,
+                    HasDedicatedWorkspace = model.HasDedicatedWorkspace,
+                    HasDryer = model.HasDryer,
+                    HasIndoorFireplace = model.HasIndoorFireplace,
+                    HasHairDryer = model.HasHairDryer,
+                    HasWifi = model.HasWifi,
+                    HasWasher = model.HasWasher,
+                    HasBackyard = model.HasBackyard,
+                    AllowsLuggageDropoff = model.AllowsLuggageDropoff,
+                    HasLockOnBedroomDoor = model.HasLockOnBedroomDoor
                 };
 
                 _context.Properties.Add(property);
@@ -87,6 +97,7 @@ namespace depi_real_state_management_system.Controllers
         }
 
 
+
         public async Task<IActionResult> Edit(int id)
         {
             var property = await _context.Properties.FindAsync(id);
@@ -96,24 +107,92 @@ namespace depi_real_state_management_system.Controllers
                 return NotFound();
             }
 
-            return View(property);
+            // Map the existing property to the ViewModel
+            var propertyViewModel = new PropertyViewModel
+            {
+                Location = property.Location,
+                Size = property.Size,
+                Price = property.PricePerNight,
+                Description = property.Description,
+                IsAvailable = property.IsAvailable,
+                OwnerId = property.OwnerId,
+                Image = null,
+                HasKitchen = property.HasKitchen,
+                HasDedicatedWorkspace = property.HasDedicatedWorkspace,
+                HasDryer = property.HasDryer,
+                HasIndoorFireplace = property.HasIndoorFireplace,
+                HasHairDryer = property.HasHairDryer,
+                HasWifi = property.HasWifi,
+                HasWasher = property.HasWasher,
+                HasBackyard = property.HasBackyard,
+                AllowsLuggageDropoff = property.AllowsLuggageDropoff,
+                HasLockOnBedroomDoor = property.HasLockOnBedroomDoor,
+            };
+
+            return View(propertyViewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, Property updatedProperty)
+        public async Task<IActionResult> Edit(int id, PropertyViewModel model)
         {
-            if (id != updatedProperty.PropertyID)
+            var existingProperty = await _context.Properties.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(model.OwnerId);
+
+            if (existingProperty == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
             if (ModelState.IsValid)
             {
-                _context.Update(updatedProperty);
+                // Process the uploaded image
+                if (model.Image != null)
+                {
+                    var fileName = Path.GetFileName(model.Image.FileName);
+                    var filePath = Path.Combine("wwwroot/images/", fileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.Image.CopyToAsync(fileStream);
+                    }
+
+                    existingProperty.ImageUrl = fileName; // Update ImageUrl with the new file
+                }
+                else
+                {
+                    existingProperty.ImageUrl = existingProperty.ImageUrl;
+                }
+
+                // Update the rest of the property details
+                existingProperty.Location = model.Location;
+                existingProperty.Size = model.Size;
+                existingProperty.PricePerNight = model.Price;
+                existingProperty.Description = model.Description;
+                existingProperty.IsAvailable = model.IsAvailable;
+                existingProperty.HasKitchen = model.HasKitchen;
+                existingProperty.HasDedicatedWorkspace = model.HasDedicatedWorkspace;
+                existingProperty.HasDryer = model.HasDryer;
+                existingProperty.HasIndoorFireplace = model.HasIndoorFireplace;
+                existingProperty.HasHairDryer = model.HasHairDryer;
+                existingProperty.HasWifi = model.HasWifi;
+                existingProperty.HasWasher = model.HasWasher;
+                existingProperty.HasBackyard = model.HasBackyard;
+                existingProperty.AllowsLuggageDropoff = model.AllowsLuggageDropoff;
+                existingProperty.HasLockOnBedroomDoor = model.HasLockOnBedroomDoor;
+
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Profile", new { id = updatedProperty.OwnerId });
+                return Redirect($"/Account/Profile/{user.Id}");
+ 
             }
-            return View(updatedProperty);
+            return View(model); // Return the model to the view if the model state is invalid
         }
+
+
+        private bool PropertyExists(int id)
+        {
+            return _context.Properties.Any(e => e.PropertyID == id);
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(string propertyId)

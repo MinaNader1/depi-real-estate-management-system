@@ -28,12 +28,23 @@ namespace depi_real_state_management_system.Models
         public DateTime DateAdded { get; set; } = DateTime.Now;
 
         [Url(ErrorMessage = "Invalid Image URL.")]
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
+        public bool HasKitchen { get; set; }
+        public bool HasDedicatedWorkspace { get; set; }
+        public bool HasDryer { get; set; }
+        public bool HasIndoorFireplace { get; set; }
+        public bool HasHairDryer { get; set; }
+        public bool HasWifi { get; set; }
+        public bool HasWasher { get; set; }
+        public bool HasBackyard { get; set; }
+        public bool AllowsLuggageDropoff { get; set; }
+        public bool HasLockOnBedroomDoor { get; set; }
+
 
         [ForeignKey("Owner")]
         public string OwnerId { get; set; }
 
-        public virtual ApplicationUser Owner { get; set; }
+        public virtual ApplicationUser? Owner { get; set; }
 
         public ICollection<Lease> Leases { get; set; }
     }
