@@ -77,28 +77,41 @@ namespace depi_real_state_management_system.Controllers
                 // Validate the start date
                 if (lease.StartDate.Date < DateTime.Now.Date)
                 {
-                    ModelState.AddModelError("StartDate", "Start date cannot be in the past.");
-                    return View(lease); // Return the form with validation errors
+                    return Json(new { success = false, message = "Start date cannot be in the past." });
                 }
 
-                // You may want to validate that the end date is also after the start date
+                // Validate that the end date is after the start date
                 if (lease.EndDate.Date <= lease.StartDate.Date)
                 {
-                    ModelState.AddModelError("EndDate", "End date must be after the start date.");
-                    return View(lease); // Return the form with validation errors
+                    return Json(new { success = false, message = "End date must be after the start date." });
                 }
 
+                // Check if the property is already booked for the selected date range
+                var conflictingLease = await _context.Leases
+                    .Where(l => l.PropertyID == lease.PropertyID &&
+                                l.StartDate < lease.EndDate &&
+                                l.EndDate > lease.StartDate) // Check for overlapping dates
+                    .FirstOrDefaultAsync();
+
+                if (conflictingLease != null)
+                {
+                    return Json(new { success = false, message = "The property is already booked for the selected dates." });
+                }
+
+                // If no conflict, proceed with creating the booking
                 _context.Leases.Add(lease);  // Add the lease to the context
                 await _context.SaveChangesAsync();  // Save changes to the database
 
-                return RedirectToAction("Details", new { id = lease.LeaseID });  // Redirect to a details page
+                return Json(new { success = true, redirectUrl = Url.Action("Details", new { id = lease.LeaseID }) });
             }
 
             // If ModelState is not valid, return the form with validation errors
-            return View(lease);
+            return Json(new { success = false, message = "Invalid data submitted." });
         }
 
-      
+
+
+
 
         // Optional: Logic to terminate the lease before 2 days
         [HttpPost]

@@ -15,7 +15,7 @@ namespace depi_real_state_management_system
         {
             List<string> roles = new List<string>()
             {
-                "Admin", "Client", "Manager"
+                "Admin", "Tenant", "Manager"
             };
 
             foreach (var role in roles)
