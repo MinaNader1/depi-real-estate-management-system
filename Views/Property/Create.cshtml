@@ -92,7 +92,6 @@
     <!-- Hidden OwnerId field (passed from the view) -->
     <input asp-for="OwnerId" type="hidden" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
 
-    <!-- Submit Button -->
     <button type="submit" class="btn btn-primary">Add Property</button>
 </form>
 

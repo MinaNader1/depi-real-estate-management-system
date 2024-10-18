@@ -126,9 +126,7 @@ namespace depi_real_state_management_system.Controllers
             await _RoleManager.CreateAsync(roleModel);
             return View();
         }
-
-
-
+        //----------------------------------------------------------------------------------------------
         public async Task<IActionResult> Profile(string id)
         {
             // Find the user by their ID

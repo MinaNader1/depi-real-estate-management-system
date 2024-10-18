@@ -184,13 +184,7 @@ namespace depi_real_state_management_system.Controllers
                 return Redirect($"/Account/Profile/{user.Id}");
  
             }
-            return View(model); // Return the model to the view if the model state is invalid
-        }
-
-
-        private bool PropertyExists(int id)
-        {
-            return _context.Properties.Any(e => e.PropertyID == id);
+            return View(model);
         }
 
 
